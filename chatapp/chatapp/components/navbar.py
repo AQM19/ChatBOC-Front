@@ -1,5 +1,6 @@
 import reflex as rx
 from chatapp.state import State
+from .. import chatapp
 
 def sidebar_chat(chat: str) -> rx.Component:
     """A sidebar chat item.
@@ -81,7 +82,11 @@ def navbar():
     return rx.box(
         rx.hstack(
             rx.hstack(
-                rx.avatar(fallback="RC", variant="solid"),
+                rx.button(
+                    rx.avatar(fallback="RC", variant="solid"),
+                    width="0px",
+                    on_click=rx.redirect("/login")
+                ),
                 rx.heading("Reflex Chat"),
                 rx.desktop_only(
                     rx.badge(
@@ -103,15 +108,15 @@ def navbar():
                         background_color=rx.color("mauve", 6),
                     )
                 ),
-                rx.desktop_only(
-                    rx.button(
-                        rx.icon(
-                            tag="sliders-horizontal",
-                            color=rx.color("mauve", 12),
-                        ),
-                        background_color=rx.color("mauve", 6),
-                    )
-                ),
+                # rx.desktop_only(
+                #     rx.button(
+                #         rx.icon(
+                #             tag="sliders-horizontal",
+                #             color=rx.color("mauve", 12),
+                #         ),
+                #         background_color=rx.color("mauve", 6),
+                #     )
+                # ),
                 align_items="center",
             ),
             justify_content="space-between",
