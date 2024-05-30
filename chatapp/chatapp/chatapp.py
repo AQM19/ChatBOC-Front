@@ -4,6 +4,7 @@ import reflex as rx
 from chatapp.components import chat, navbar
 from flask import Flask, jsonify, make_response
 from flask_jwt_extended import create_access_token
+import hashlib
 
 app = Flask(__name__)
 
@@ -32,6 +33,7 @@ def login_page() -> rx.Component:
                     rx.form.control(
                         rx.input(
                             placeholder="Username",
+                            name="user",
                             # type attribute is required for "typeMismatch" validation
                             type="text",
                         ),
@@ -41,6 +43,7 @@ def login_page() -> rx.Component:
                     rx.form.control(
                         rx.input(
                             placeholder="Password",
+                            name="pass",
                             # type attribute is required for "typeMismatch" validation
                             type="password",
                         ),
@@ -60,11 +63,8 @@ def login_page() -> rx.Component:
                     spacing="2",
                     align="stretch",
                 ),
-                name="login",
             ),
-            # on_submit=lambda form_data: rx.window_alert(
-            #     form_data.to_string()
-            # ),
+            on_submit = FormState.handle_submit_login,
             reset_on_submit=True,
             width="50vh",
             height="80vh",  # Ajusta la altura del contenedor para centrar verticalmente
@@ -85,6 +85,7 @@ def register_page() -> rx.Component:
                     rx.form.control(
                         rx.input(
                             placeholder="Email",
+                            name="email",
                             # type attribute is required for "typeMismatch" validation
                             type="email",
                         ),
@@ -94,6 +95,7 @@ def register_page() -> rx.Component:
                     rx.form.control(
                         rx.input(
                             placeholder="Username",
+                            name="user",
                             # type attribute is required for "typeMismatch" validation
                             type="text",
                         ),
@@ -103,15 +105,7 @@ def register_page() -> rx.Component:
                     rx.form.control(
                         rx.input(
                             placeholder="Password",
-                            # type attribute is required for "typeMismatch" validation
-                            type="password",
-                        ),
-                        as_child=True,
-                    ),
-                    rx.form.label("Confirm Password"),
-                    rx.form.control(
-                        rx.input(
-                            placeholder="confirm Password",
+                            name="pass",
                             # type attribute is required for "typeMismatch" validation
                             type="password",
                         ),
@@ -131,11 +125,11 @@ def register_page() -> rx.Component:
                     spacing="2",
                     align="stretch",
                 ),
-                name="register",
+                
             ),
-            # on_submit=lambda form_data: rx.window_alert(
-            #     form_data.to_string()
-            # ),
+            on_submit=lambda form_data: rx.window_alert(
+                form_data.to_string()
+            ),
             reset_on_submit=True,
             width="50vh",
             height="80vh",  # Ajusta la altura del contenedor para centrar verticalmente
@@ -145,23 +139,69 @@ def register_page() -> rx.Component:
         
     )
 
-def login(usuario, contraseña):
-    #Hashear 
+class FormState(rx.State):
+    form_data: dict = {}
+
+    def handle_submit_login(self, form_data: dict):
+        """Handle the form submit."""
+        self.form_data = form_data
+        self.login(form_data)
+
+    def handle_submit_register(self, form_data: dict):
+        """Handle the form submit."""
+        self.form_data = form_data
+        self.login(form_data)
+
+    def login(self, data):
+        username = data.get("user")
+        password = data.get("pass")
+
+        #Hashear 
+        hashed_password = self.hash_password(password)
+
+
+        #Request
     
-    #Request
+        user_id=2
+        #Cookie
     
-    #Cookie
+        # access_token = create_access_token(identity=user_id)
+        # response = jsonify(access_token=access_token)
+        # response.set_cookie('access_token', value=access_token)  
+
+    def register(self, data):
+        email = data.get("email")
+        username = data.get("user")
+        password = data.get("pass")  
+
+        #Hashear 
+        hashed_password = self.hash_password(password)
+
+        #Request
     
-    # Crear el token de acceso
-    access_token = create_access_token(identity=user_id)
+        user_id=2
+
+        #Cookie
     
-    # Crear una respuesta JSON con el token de acceso
-    response = jsonify(access_token=access_token)
+        # access_token = create_access_token(identity=user_id)
+        # response = jsonify(access_token=access_token)
+        # response.set_cookie('access_token', value=access_token) 
+
+    def hash_password(self, password):
+        """Hash a password."""
+        # Codifica la contraseña como bytes UTF-8 antes de pasarla al algoritmo de hash
+        encoded_password = password.encode('utf-8')
     
-    # Establecer la cookie
-    response.set_cookie('access_token', value=access_token)
+        # Crea un objeto hash SHA-256
+        hasher = hashlib.sha256()
     
-    return 
+        # Actualiza el objeto hash con los bytes de la contraseña
+        hasher.update(encoded_password)
+    
+        # Obtiene la representación hexadecimal del hash
+        hashed_password = hasher.hexdigest()
+    
+        return hashed_password
 
 # Add state and page to the app.
 app = rx.App(
