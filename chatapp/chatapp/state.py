@@ -15,11 +15,35 @@ class QA(rx.Base):
     question: str
     answer: str
 
+def nombres_chats():
+    try:
+        response = requests.get("https://pokeapi.co/api/v2/pokemon/ditto")
+        response.raise_for_status()  # Lanza una excepción si la respuesta no es exitosa (código de estado diferente de 200)
+        data = response.json()  # Devuelve los datos de la respuesta en formato JSON
+        print(type(data))
+        print (list(data.keys())[0])
+    except requests.exceptions.RequestException as e:
+        print("Error al hacer la solicitud:", e)
+        return None
 
 DEFAULT_CHATS = {
     "Intros": [],
 }
+def recibir_chats():
+    try:
+        response = requests.get("https://pokeapi.co/api/v2/pokemon/ditto")
+        response.raise_for_status()  # Lanza una excepción si la respuesta no es exitosa (código de estado diferente de 200)
+        data = response.json()  # Devuelve los datos de la respuesta en formato JSON
+        print(type(data))
+        lista_chats = (list(data.keys()))
+        for clave in data.keys():
+            DEFAULT_CHATS[clave] = []
+        return DEFAULT_CHATS
+    except requests.exceptions.RequestException as e:
+        print("Error al hacer la solicitud:", e)
+        return None
 
+DEFAULT_CHATS=recibir_chats()
 
 class State(rx.State):
     """The app state."""
@@ -45,16 +69,6 @@ class State(rx.State):
         self.current_chat = self.new_chat_name
         self.chats[self.new_chat_name] = []
 
-        try:
-            response = requests.get("https://pokeapi.co/api/v2/pokemon/ditto")
-            response.raise_for_status()  # Lanza una excepción si la respuesta no es exitosa (código de estado diferente de 200)
-            data = response.json()  # Devuelve los datos de la respuesta en formato JSON
-            print(type(data))
-            print (list(data.keys())[0])
-        except requests.exceptions.RequestException as e:
-            print("Error al hacer la solicitud:", e)
-            return None
-        
         """Create a new chat."""
         # Add the new chat to the list of chats.
         self.current_chat = self.new_chat_name
