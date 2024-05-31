@@ -29,6 +29,7 @@ def nombres_chats():
 DEFAULT_CHATS = {
     "Intros": [],
 }
+
 def recibir_chats():
     try:
         response = requests.get("https://pokeapi.co/api/v2/pokemon/ditto")
