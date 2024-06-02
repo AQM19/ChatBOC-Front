@@ -2,12 +2,13 @@
 
 import reflex as rx
 from chatapp.components import chat, navbar
-from flask import Flask, jsonify, make_response
+from flask import jsonify
 from flask_jwt_extended import create_access_token
+from chatapp.state import State
 
-app = Flask(__name__)
 
-@rx.page(route="/")
+
+@rx.page(route="/", on_load=State.getChats)
 def index() -> rx.Component:
     """The main app."""
     return rx.chakra.vstack(
@@ -34,6 +35,7 @@ def login_page() -> rx.Component:
                             placeholder="Username",
                             # type attribute is required for "typeMismatch" validation
                             type="text",
+                            name="username",
                         ),
                         as_child=True,
                     ),
@@ -43,6 +45,7 @@ def login_page() -> rx.Component:
                             placeholder="Password",
                             # type attribute is required for "typeMismatch" validation
                             type="password",
+                            name="password",
                         ),
                         as_child=True,
                     ),
@@ -62,9 +65,7 @@ def login_page() -> rx.Component:
                 ),
                 name="login",
             ),
-            # on_submit=lambda form_data: rx.window_alert(
-            #     form_data.to_string()
-            # ),
+            on_submit=State.login,
             reset_on_submit=True,
             width="50vh",
             height="80vh",  # Ajusta la altura del contenedor para centrar verticalmente
@@ -87,6 +88,7 @@ def register_page() -> rx.Component:
                             placeholder="Email",
                             # type attribute is required for "typeMismatch" validation
                             type="email",
+                            name="email",
                         ),
                         as_child=True,
                     ),
@@ -96,6 +98,7 @@ def register_page() -> rx.Component:
                             placeholder="Username",
                             # type attribute is required for "typeMismatch" validation
                             type="text",
+                            name="username",
                         ),
                         as_child=True,
                     ),
@@ -105,6 +108,7 @@ def register_page() -> rx.Component:
                             placeholder="Password",
                             # type attribute is required for "typeMismatch" validation
                             type="password",
+                            name="password"
                         ),
                         as_child=True,
                     ),
@@ -114,6 +118,7 @@ def register_page() -> rx.Component:
                             placeholder="confirm Password",
                             # type attribute is required for "typeMismatch" validation
                             type="password",
+                            name="confirm_password"
                         ),
                         as_child=True,
                     ),
@@ -133,9 +138,7 @@ def register_page() -> rx.Component:
                 ),
                 name="register",
             ),
-            # on_submit=lambda form_data: rx.window_alert(
-            #     form_data.to_string()
-            # ),
+            on_submit=State.register,
             reset_on_submit=True,
             width="50vh",
             height="80vh",  # Ajusta la altura del contenedor para centrar verticalmente
@@ -145,23 +148,6 @@ def register_page() -> rx.Component:
         
     )
 
-def login(usuario, contraseña):
-    #Hashear 
-    
-    #Request
-    
-    #Cookie
-    
-    # Crear el token de acceso
-    access_token = create_access_token(identity=user_id)
-    
-    # Crear una respuesta JSON con el token de acceso
-    response = jsonify(access_token=access_token)
-    
-    # Establecer la cookie
-    response.set_cookie('access_token', value=access_token)
-    
-    return 
 
 # Add state and page to the app.
 app = rx.App(
@@ -169,6 +155,7 @@ app = rx.App(
         appearance="dark",
         accent_color="violet",
     ),
+    
 )
 app.add_page(index)
 app.add_page(login_page)
