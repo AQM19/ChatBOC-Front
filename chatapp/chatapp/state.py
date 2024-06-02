@@ -2,7 +2,6 @@ import os
 import reflex as rx
 import requests
 import httpx
-from chatapp.env import JWT_SECRET_KEY, SECRET_KEY
 from loguru import logger
 
 
@@ -57,6 +56,11 @@ class State(rx.State):
             for chat in data:
                 self.chats_uuid[chat[1]] = chat[0]
                 self.chats[chat[1]] = self.getChat(chat[0],chat[1])
+            # If data is not empty, set the first chat as the current chat.
+            if data:
+                self.current_chat = data[0][1]
+                # Remove DEFAULT_CHATS
+                # del self.chats['Intros']
         except httpx.HTTPStatusError:
             return rx.event.window_alert("Server error, please try again.")
             #self.current_chat = chat[0]
@@ -72,8 +76,28 @@ class State(rx.State):
             response = httpx.get(f'http://localhost:5000/user/chat/{chat_id}/messages', headers=headers,cookies=cookies)
             data = response.json()
             messages = []
+            question = ""
+            answer = ""
+            data.reverse()
             for line in data:
-                messages.append(QA(question=line[6], answer=line[3]))
+                # manejo de respuesta: lista de listas
+                # formato [id, chat_id, user_id, message, is_response, created_at]
+                # line[0] -> id
+                # line[1] -> chat_id
+                # line[2] -> user_id
+                # line[3] -> message
+                # line[4] -> is_response
+                # line[5] -> created_at
+                logger.info(f"Line: {line}")
+                if line[4]:
+                    answer = line[3]
+                else:
+                    question = line[3]
+                if question and answer:
+                    messages.append(QA(question=question, answer=answer))
+                    question = ""
+                    answer = ""
+                # messages.append(QA(question=line[6], answer=line[3]))
             return messages
         except httpx.HTTPStatusError:
             return rx.event.window_alert(f"Server error, please try again.{self.session}")
@@ -135,9 +159,9 @@ class State(rx.State):
                                 cookies=cookies)
             if response.status_code != 200 or not 'chat_id' in response.json():
                 return rx.event.window_alert("Server error, please try again.")
-            logger.info(f"Response: {response}")
+            #logger.info(f"Response: {response}")
             data = response.json()
-            logger.info(f"Data: {data}")
+            #logger.info(f"Data: {data}")
             self.chats_uuid[self.new_chat_name] = data['chat_id'][0]
         except httpx.HTTPStatusError:
             return rx.event.window_alert("Server error, please try again.")
@@ -147,14 +171,21 @@ class State(rx.State):
         """Delete the current chat."""
         cookies = {'session': self.session}
         headers = {'Authorization': f'Bearer {self.token}'}
+        if not self.current_chat in self.chats_uuid:
+            return rx.event.window_alert("The current chat has no uuid.")
+        logger.info(f"Deleting chat {self.chats_uuid[self.current_chat]}")
         try:
             response = httpx.delete(f'http://localhost:5000/user/chat/{self.chats_uuid[self.current_chat]}', headers=headers, cookies=cookies)
         except httpx.HTTPStatusError:
             return rx.event.window_alert("Server error, please try again.")
         del self.chats[self.current_chat]
+        logger.info(f"Chats: {self.chats}")
+        logger.info(f"Chats UUID: {self.chats_uuid}")
+        logger.info(len(self.chats))
         if len(self.chats) == 0:
+            logger.info("No chats left.")
             self.chats = DEFAULT_CHATS
-        self.current_chat = list(self.chats.keys())[0]
+        self.current_chat = list(self.chats.keys())[-1]
 
     def set_chat(self, chat_name: str):
         """Set the name of the current chat.
@@ -232,11 +263,11 @@ class State(rx.State):
         cookies = {'session': self.session}
         headers = {'Authorization': f'Bearer {self.token}'}
         response = httpx.get(f'http://localhost:5000/?question={question}&chat_id={self.chats_uuid[self.current_chat]}', headers=headers, cookies=cookies, timeout=None)
-        
+        answer_text=None
         if not response or response.status_code != 200:
             self.chats[self.current_chat][-1].answer += "Sorry, I couldn't get a response from the server."
         else:
-            
+            logger.info(f"Response: {response}")
             answer_text = response.json()
             if answer_text is not None:
                 self.chats[self.current_chat][-1].answer += answer_text

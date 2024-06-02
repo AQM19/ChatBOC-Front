@@ -112,16 +112,6 @@ def register_page() -> rx.Component:
                         ),
                         as_child=True,
                     ),
-                    rx.form.label("Confirm Password"),
-                    rx.form.control(
-                        rx.input(
-                            placeholder="confirm Password",
-                            # type attribute is required for "typeMismatch" validation
-                            type="password",
-                            name="confirm_password"
-                        ),
-                        as_child=True,
-                    ),
                     rx.form.message(
                         "Please enter a valid email",
                         match="typeMismatch",
