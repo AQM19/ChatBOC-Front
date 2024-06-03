@@ -279,8 +279,8 @@ class State(rx.State):
         if not response or response.status_code != 200:
             self.chats[self.current_chat][-1].answer += "Sorry, I couldn't get a response from the server."
         else:
-            logger.info(f"Response: {response}")
-            answer_text = response.json()
+            logger.info(f"Response: {response.json()['message']}")
+            answer_text = response.json()['message'] 
             if answer_text is not None:
                 self.chats[self.current_chat][-1].answer += answer_text
             else:
