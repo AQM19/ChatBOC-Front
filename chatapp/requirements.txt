@@ -2,3 +2,4 @@ reflex>=0.4.7
 openai>=1.14.0
 flask>=3.0.3
 flask_jwt_extended==4.6.0
+loguru==0.7.2

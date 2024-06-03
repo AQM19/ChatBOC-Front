@@ -47,7 +47,10 @@ class State(rx.State):
         cookies = {'session': self.session}
         headers = {'Authorization': f'Bearer {self.token}'}
         try:
-            response = httpx.get('http://localhost:5000/user/chats', headers=headers, cookies=cookies)
+            response = httpx.get('http://localhost:5000/user/chats', 
+                                 headers=headers, 
+                                 cookies=cookies,
+                                 timeout=30)
             data = response.json()
             
             if response.status_code != 200:
@@ -73,7 +76,7 @@ class State(rx.State):
         cookies = {'session': self.session}
         headers = {'Authorization': f'Bearer {self.token}'}
         try:
-            response = httpx.get(f'http://localhost:5000/user/chat/{chat_id}/messages', headers=headers,cookies=cookies)
+            response = httpx.get(f'http://localhost:5000/user/chat/{chat_id}/messages', headers=headers,cookies=cookies,timeout=30)
             data = response.json()
             messages = []
             question = ""
@@ -107,6 +110,7 @@ class State(rx.State):
             
             response = httpx.post('http://localhost:5000/login', 
                                   json={'username': form_data['username'], 'password': form_data['password']},
+                                  timeout=30,
                                   )
             response.raise_for_status()
             data = response.json()
@@ -134,6 +138,7 @@ class State(rx.State):
             
             response = httpx.post('http://localhost:5000/register', 
                                   json=data,
+                                  timeout=30
                                   )
             response.raise_for_status()
             data = response.json()
@@ -156,7 +161,8 @@ class State(rx.State):
             response = httpx.post('http://localhost:5000/user/chat',
                                 json=data,
                                 headers=headers,
-                                cookies=cookies)
+                                cookies=cookies,
+                                timeout=30)
             if response.status_code != 200 or not 'chat_id' in response.json():
                 return rx.event.window_alert("Server error, please try again.")
             #logger.info(f"Response: {response}")
@@ -175,7 +181,10 @@ class State(rx.State):
             return rx.event.window_alert("The current chat has no uuid.")
         logger.info(f"Deleting chat {self.chats_uuid[self.current_chat]}")
         try:
-            response = httpx.delete(f'http://localhost:5000/user/chat/{self.chats_uuid[self.current_chat]}', headers=headers, cookies=cookies)
+            response = httpx.delete(f'http://localhost:5000/user/chat/{self.chats_uuid[self.current_chat]}', 
+                                    headers=headers, 
+                                    cookies=cookies,
+                                    timeout=30)
         except httpx.HTTPStatusError:
             return rx.event.window_alert("Server error, please try again.")
         del self.chats[self.current_chat]
@@ -262,7 +271,10 @@ class State(rx.State):
         #response = requests.get("http://localhost:5000/")
         cookies = {'session': self.session}
         headers = {'Authorization': f'Bearer {self.token}'}
-        response = httpx.get(f'http://localhost:5000/?question={question}&chat_id={self.chats_uuid[self.current_chat]}', headers=headers, cookies=cookies, timeout=None)
+        response = httpx.get(f'http://localhost:5000/?question={question}&chat_id={self.chats_uuid[self.current_chat]}',
+                              headers=headers,
+                              cookies=cookies, 
+                              timeout=None)
         answer_text=None
         if not response or response.status_code != 200:
             self.chats[self.current_chat][-1].answer += "Sorry, I couldn't get a response from the server."

@@ -42,7 +42,14 @@ Initialize and run the app:
 reflex init
 reflex run
 ```
+### OR Run script
 
+After clone git:
+
+```bash
+chmod +x init.sh
+./init.sh
+```
 # Features
 
 - 100% Python-based, including the UI, using Reflex
