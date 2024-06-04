@@ -60,13 +60,13 @@ def modal(trigger) -> rx.Component:
         rx.dialog.content(
             rx.hstack(
                 rx.input(
-                    placeholder="Type something...",
+                    placeholder="Escriba nombre de chat...",
                     on_blur=State.set_new_chat_name,
                     width=["15em", "20em", "30em", "30em", "30em", "30em"],
                 ),
                 rx.dialog.close(
                     rx.button(
-                        "Create chat",
+                        "Crear chat",
                         on_click=State.create_chat,
                     ),
                 ),
@@ -91,14 +91,14 @@ def navbar():
                 rx.desktop_only(
                     rx.badge(
                     State.current_chat,
-                    rx.tooltip(rx.icon("info", size=14), content="The current selected chat."),
+                    rx.tooltip(rx.icon("info", size=14), content="Chat seleccionado"),
                     variant="soft"
                     )
                 ),
                 align_items="center",
             ),
             rx.hstack(
-                modal(rx.button("+ New chat")),
+                modal(rx.button("+ Nuevo chat")),
                 sidebar(
                     rx.button(
                         rx.icon(

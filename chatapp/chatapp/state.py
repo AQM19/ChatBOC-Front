@@ -3,6 +3,9 @@ import reflex as rx
 import requests
 import httpx
 from loguru import logger
+import os
+from dotenv import load_dotenv
+
 
 
 class QA(rx.Base):
@@ -17,6 +20,8 @@ DEFAULT_CHATS = {
 
 class State(rx.State):
     """The app state."""
+
+    load_dotenv()
 
     # A dict from the chat name to the list of questions and answers.
     chats: dict[str, list[QA]] = DEFAULT_CHATS
@@ -47,7 +52,7 @@ class State(rx.State):
         cookies = {'session': self.session}
         headers = {'Authorization': f'Bearer {self.token}'}
         try:
-            response = httpx.get('http://localhost:5000/user/chats', 
+            response = httpx.get(os.getenv('BACKEND_URL')+'/user/chats', 
                                  headers=headers, 
                                  cookies=cookies,
                                  timeout=30)
@@ -59,14 +64,14 @@ class State(rx.State):
             for chat in data:
                 self.chats_uuid[chat[1]] = chat[0]
                 self.chats[chat[1]] = self.getChat(chat[0],chat[1])
-            # If data is not empty, set the first chat as the current chat.
+            # If data is not empty, set the last chat as the current chat.
             if data:
-                self.current_chat = data[0][1]
+                self.current_chat = data[-1][1]
                 # Remove DEFAULT_CHATS
                 # del self.chats['Intros']
         except httpx.HTTPStatusError:
             return rx.event.window_alert("Server error, please try again.")
-            #self.current_chat = chat[0]
+            
             
     
     def getChat(self, chat_id, chat_name):
@@ -76,7 +81,7 @@ class State(rx.State):
         cookies = {'session': self.session}
         headers = {'Authorization': f'Bearer {self.token}'}
         try:
-            response = httpx.get(f'http://localhost:5000/user/chat/{chat_id}/messages', headers=headers,cookies=cookies,timeout=30)
+            response = httpx.get(os.getenv('BACKEND_URL')+f'/user/chat/{chat_id}/messages', headers=headers,cookies=cookies,timeout=30)
             data = response.json()
             messages = []
             question = ""
@@ -101,6 +106,7 @@ class State(rx.State):
                     question = ""
                     answer = ""
                 # messages.append(QA(question=line[6], answer=line[3]))
+            
             return messages
         except httpx.HTTPStatusError:
             return rx.event.window_alert(f"Server error, please try again.{self.session}")
@@ -108,7 +114,7 @@ class State(rx.State):
     def login(self,form_data):
         try:
             
-            response = httpx.post('http://localhost:5000/login', 
+            response = httpx.post(os.getenv('BACKEND_URL')+'/login', 
                                   json={'username': form_data['username'], 'password': form_data['password']},
                                   timeout=30,
                                   )
@@ -136,7 +142,7 @@ class State(rx.State):
                 'email': form_data['email']
             }
             
-            response = httpx.post('http://localhost:5000/register', 
+            response = httpx.post(os.getenv('BACKEND_URL')+'/register', 
                                   json=data,
                                   timeout=30
                                   )
@@ -158,7 +164,7 @@ class State(rx.State):
             'chat_name': self.new_chat_name
         }
         try:
-            response = httpx.post('http://localhost:5000/user/chat',
+            response = httpx.post(os.getenv('BACKEND_URL')+'/user/chat',
                                 json=data,
                                 headers=headers,
                                 cookies=cookies,
@@ -181,7 +187,7 @@ class State(rx.State):
             return rx.event.window_alert("The current chat has no uuid.")
         logger.info(f"Deleting chat {self.chats_uuid[self.current_chat]}")
         try:
-            response = httpx.delete(f'http://localhost:5000/user/chat/{self.chats_uuid[self.current_chat]}', 
+            response = httpx.delete(os.getenv('BACKEND_URL')+f'/user/chat/{self.chats_uuid[self.current_chat]}', 
                                     headers=headers, 
                                     cookies=cookies,
                                     timeout=30)
@@ -202,9 +208,14 @@ class State(rx.State):
         Args:
             chat_name: The name of the chat.
         """
-        
         self.current_chat = chat_name
 
+
+    def scroll_to_bottom(self):
+        """Scroll to the bottom of the chat."""
+        #logger.info("Scrolling to bottom")
+        
+        return rx.scroll_to("chat-end")
     @rx.var
     def chat_titles(self) -> list[str]:
         """Get the list of chat titles.
@@ -221,9 +232,13 @@ class State(rx.State):
         # Check if the question is empty
         if question == "":
             return
-
+        # Add the question to the list of questions.
+        # qa = QA(question=question, answer="...procesando")
+        # self.chats[self.current_chat].append(qa)
+        # self.processing = True
+        
         model = self.openai_process_question
-
+        
         async for value in model(question):
             yield value
 
@@ -233,14 +248,79 @@ class State(rx.State):
         Args:
             form_data: A dict with the current question.
         """
-
-        # Add the question to the list of questions.
+        
         qa = QA(question=question, answer="")
         self.chats[self.current_chat].append(qa)
 
         # Clear the input and start the processing.
         self.processing = True
         yield
+
+        # Build the messages.
+        # messages = [
+        #     {
+        #         "role": "system",
+        #         "content": "You are a friendly chatbot named chatBOC. Respond in markdown.",
+        #     }
+        # ]
+        # for qa in self.chats[self.current_chat]:
+        #     messages.append({"role": "user", "content": qa.question})
+        #     messages.append({"role": "assistant", "content": qa.answer})
+
+        # # Remove the last mock answer.
+        # messages = messages[:-1]
+
+        # The following commented-out section is for OpenAI API call simulation.
+        # Uncomment and use it if you have OpenAI setup.
+        #
+        # session = OpenAI().chat.completions.create(
+        #     model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
+        #     messages=messages,
+        #     stream=True,
+        # )
+        #
+        # Stream the results, yielding after every word.
+        # for item in session:
+        #     if hasattr(item.choices[0].delta, "content"):
+        #response = requests.get("http://localhost:5000/")
+        cookies = {'session': self.session}
+        headers = {'Authorization': f'Bearer {self.token}'}
+        response = httpx.get(os.getenv('BACKEND_URL')+f'/?question={question}&chat_id={self.chats_uuid[self.current_chat]}',
+                              headers=headers,
+                              cookies=cookies, 
+                              timeout=None)
+        answer_text=None
+        if not response or response.status_code != 200:
+            self.chats[self.current_chat][-1].answer += "Sorry, I couldn't get a response from the server."
+        else:
+            logger.info(f"Response: {response}")
+            answer_text = response.json()
+            if answer_text is not None:
+                self.chats[self.current_chat][-1].answer += answer_text
+            else:
+                answer_text = ""
+                self.chats[self.current_chat][-1].answer += answer_text
+            self.chats = self.chats
+            yield
+        
+
+        # Toggle the processing flag.
+        self.processing = False
+        yield
+
+    def llama_process_question(self, question: str):
+
+        """Get the response from the API.
+
+        Args:
+            form_data: A dict with the current question.
+        """
+
+        
+
+        # Clear the input and start the processing.
+        self.processing = True
+        
 
         # Build the messages.
         messages = [
@@ -271,7 +351,7 @@ class State(rx.State):
         #response = requests.get("http://localhost:5000/")
         cookies = {'session': self.session}
         headers = {'Authorization': f'Bearer {self.token}'}
-        response = httpx.get(f'http://localhost:5000/?question={question}&chat_id={self.chats_uuid[self.current_chat]}',
+        response = httpx.get(os.getenv('BACKEND_URL')+f'/?question={question}&chat_id={self.chats_uuid[self.current_chat]}',
                               headers=headers,
                               cookies=cookies, 
                               timeout=None)
@@ -279,17 +359,17 @@ class State(rx.State):
         if not response or response.status_code != 200:
             self.chats[self.current_chat][-1].answer += "Sorry, I couldn't get a response from the server."
         else:
-            logger.info(f"Response: {response.json()['message']}")
-            answer_text = response.json()['message'] 
+            logger.info(f"Response: {response}")
+            answer_text = response.json()
             if answer_text is not None:
                 self.chats[self.current_chat][-1].answer += answer_text
             else:
                 answer_text = ""
                 self.chats[self.current_chat][-1].answer += answer_text
             self.chats = self.chats
-            yield
+            
         
 
         # Toggle the processing flag.
         self.processing = False
-        yield 
+        return

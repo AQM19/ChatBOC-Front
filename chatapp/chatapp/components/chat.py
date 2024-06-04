@@ -44,17 +44,20 @@ def message(qa: QA) -> rx.Component:
 def chat() -> rx.Component:
     """List all the messages in a single conversation."""
     return rx.vstack(
-        rx.box(rx.foreach(State.chats[State.current_chat], message), width="100%"),
-        py="8",
-        flex="1",
-        width="100%",
-        max_width="50em",
-        padding_x="4px",
-        align_self="center",
-        overflow="hidden",
-        padding_bottom="5em",
-    )
-
+            rx.box(rx.foreach(State.chats[State.current_chat], message), width="100%", id="chat-box",),
+            rx.text("", id="chat-end"),
+            py="8",
+            flex="1",
+            width="100%",
+            max_width="50em",
+            padding_x="4px",
+            align_self="center",
+            align_items="center",
+            overflow="scroll",
+            padding_bottom="5em",
+            on_mount=State.scroll_to_bottom,
+        )
+    
 
 def action_bar() -> rx.Component:
     """The action bar to send a new message."""
@@ -65,17 +68,18 @@ def action_bar() -> rx.Component:
                     rx.hstack(
                         rx.radix.text_field.root(
                             rx.radix.text_field.input(
-                                placeholder="Type something...",
+                                placeholder="Escribe algo...",
                                 id="question",
                                 width=["15em", "20em", "45em", "50em", "50em", "50em"],
-                                name="question"
+                                name="question",
                             ),
                             rx.radix.text_field.slot(
                                 rx.tooltip(
                                     rx.icon("info", size=18),
-                                    content="Enter a question to get a response.",
+                                    content="Haz una pregunta",
                                 )
                             ),
+                            id_disable=State.processing,
                         ),
                         rx.button(
                             rx.cond(
@@ -85,6 +89,12 @@ def action_bar() -> rx.Component:
                             ),
                             type="submit",
                         ),
+                        rx.button(
+                            "⇓", 
+                            on_click=State.scroll_to_bottom,
+                            id="scroll-down",
+                            type="button"
+                            ),
                         align_items="center",
                     ),
                     is_disabled=State.processing,
@@ -93,12 +103,12 @@ def action_bar() -> rx.Component:
                 reset_on_submit=True,
             ),
             rx.text(
-                "ChatBOC may return factually incorrect or misleading responses. Use discretion.",
+                "ChatBOC puede responder incorrectamente o imprecisa. Uselo con precaución.",
                 text_align="center",
                 font_size=".75em",
                 color=rx.color("mauve", 10),
             ),
-            rx.logo(margin_top="-1em", margin_bottom="-1em"),
+            #rx.logo(margin_top="-1em", margin_bottom="-1em"),
             align_items="center",
         ),
         position="sticky",

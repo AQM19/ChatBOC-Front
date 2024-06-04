@@ -9,7 +9,7 @@ def modal() -> rx.Component:
             rx.chakra.modal_content(
                 rx.chakra.modal_header(
                     rx.chakra.hstack(
-                        rx.chakra.text("Create new chat"),
+                        rx.chakra.text("Crear nuevo chat"),
                         rx.chakra.icon(
                             tag="close",
                             font_size="sm",
@@ -24,7 +24,7 @@ def modal() -> rx.Component:
                 ),
                 rx.chakra.modal_body(
                     rx.chakra.input(
-                        placeholder="Type something...",
+                        placeholder="Escribe algo",
                         on_blur=State.set_new_chat_name,
                         bg="#222",
                         border_color="#fff3",
@@ -33,7 +33,7 @@ def modal() -> rx.Component:
                 ),
                 rx.chakra.modal_footer(
                     rx.chakra.button(
-                        "Create",
+                        "Crear",
                         bg="#5535d4",
                         box_shadow="md",
                         px="4",

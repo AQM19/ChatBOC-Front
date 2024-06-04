@@ -8,7 +8,7 @@ from chatapp.state import State
 
 
 
-@rx.page(route="/", on_load=State.getChats)
+@rx.page(route="/", title="ChatBOC")
 def index() -> rx.Component:
     """The main app."""
     return rx.chakra.vstack(
@@ -20,6 +20,7 @@ def index() -> rx.Component:
         min_height="100vh",
         align_items="stretch",
         spacing="0",
+        on_mount=State.getChats,
     )
 
 @rx.page(route="/login")
@@ -150,3 +151,4 @@ app = rx.App(
 app.add_page(index)
 app.add_page(login_page)
 app.add_page(register_page)
+
