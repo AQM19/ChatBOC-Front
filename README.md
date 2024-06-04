@@ -10,19 +10,22 @@ Una aplicación web Python fácil de usar y altamente personalizable diseñada p
 
 Para iniciar la aplicación ejecutar en consola:
 
+### 1. Descarga fichero install
+
 ```bash
-chmod +x init.sh
-./init.sh
+chmod +x install.sh
+./install.sh
 ```
+#
 El Script realiza:
 
-### 🧬 1. Clona el Repo
+#### 🧬 1. Clona el Repo
 
 ```bash
 git clone https://github.com/reflex-dev/reflex-chat.git
 ```
 
-### 📦 2. Instalar dependencias
+#### 📦 2. Instalar dependencias
 
 Para lanzar la aplicación se necesita lo siguiente:
 
@@ -36,7 +39,7 @@ Install `pip` con las dependencias en `requirements.txt`:
 pip install -r requirements.txt
 ```
 
-### 🚀 3. Ejecutar app
+#### 🚀 3. Ejecutar app
 
 Inicialización y ejecución de la app:
 

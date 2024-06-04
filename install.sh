@@ -4,6 +4,17 @@ echo '**************************************************************************
 echo Clonando repositorio
 echo '**************************************************************************************************'
 
+# checkear si git esta instalado
+if ! [ -x "$(command -v git)" ]; then
+    echo 'Error: git no está instalado.' >&2
+    exit 1
+fi
+# checkear si existe F-ChatBOC-Front
+if [ -d "F-ChatBOC-Front" ]; then
+    echo 'Error: F-ChatBOC-Front ya existe.' >&2
+    ./F-ChatBOC/chatapp/init.sh
+    
+fi
 
 git clone -b despliegue https://github.com/AQM19/F-ChatBOC-Front.git
 cd F-ChatBOC-Front
@@ -40,9 +51,6 @@ fi
 pip install -r requirements.txt
 
 # Inicio de la api
-echo '**************************************************************************************************'
-echo Iniciando la aplicacion
-echo '**************************************************************************************************'
 
-
-reflex run
+chmod +x init.sh
+./init.sh
