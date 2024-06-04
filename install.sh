@@ -12,11 +12,11 @@ fi
 # checkear si existe F-ChatBOC-Front
 if [ -d "F-ChatBOC-Front" ]; then
     echo 'Error: F-ChatBOC-Front ya existe.' >&2
-    ./F-ChatBOC/chatapp/init.sh
+    ./F-ChatBOC/chatapp/chatapp/init.sh
     
 fi
 
-git clone -b despliegue https://github.com/AQM19/F-ChatBOC-Front.git
+git clone -b despliegue https://github.com/AQM19/F-ChatBOC-Front.git -u
 cd F-ChatBOC-Front
 cd chatapp
 
@@ -51,6 +51,6 @@ fi
 pip install -r requirements.txt
 
 # Inicio de la api
-
+cd chatapp
 chmod +x init.sh
 ./init.sh
