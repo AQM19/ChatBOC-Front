@@ -8,7 +8,7 @@ from chatapp.state import State
 
 
 
-@rx.page(route="/", title="ChatBOC")
+@rx.page(route="/", title="ChatBOC", on_load=State.scroll_to_bottom())
 def index() -> rx.Component:
     """The main app."""
     return rx.chakra.vstack(

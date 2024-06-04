@@ -213,7 +213,7 @@ class State(rx.State):
 
     def scroll_to_bottom(self):
         """Scroll to the bottom of the chat."""
-        #logger.info("Scrolling to bottom")
+        logger.info("Scrolling to bottom")
         
         return rx.scroll_to("chat-end")
     @rx.var
@@ -294,7 +294,7 @@ class State(rx.State):
             self.chats[self.current_chat][-1].answer += "Sorry, I couldn't get a response from the server."
         else:
             logger.info(f"Response: {response}")
-            answer_text = response.json()
+            answer_text = response.json()['message']
             if answer_text is not None:
                 self.chats[self.current_chat][-1].answer += answer_text
             else:
@@ -303,6 +303,7 @@ class State(rx.State):
             self.chats = self.chats
             yield
         
+        self.scroll_to_bottom()
 
         # Toggle the processing flag.
         self.processing = False
@@ -369,6 +370,7 @@ class State(rx.State):
             self.chats = self.chats
             
         
+        self.scroll_to_bottom()
 
         # Toggle the processing flag.
         self.processing = False

@@ -1,24 +1,24 @@
 #!/bin/bash
 
-echo '**************************************************************************************************'
-echo Clonando repositorio
-echo '**************************************************************************************************'
+# echo '**************************************************************************************************'
+# echo Clonando repositorio
+# echo '**************************************************************************************************'
 
-# checkear si git esta instalado
-if ! [ -x "$(command -v git)" ]; then
-    echo 'Error: git no está instalado.' >&2
-    exit 1
-fi
-# checkear si existe F-ChatBOC-Front
-if [ -d "F-ChatBOC-Front" ]; then
-    echo 'Error: F-ChatBOC-Front ya existe.' >&2
-    ./F-ChatBOC/chatapp/chatapp/init.sh
+# # checkear si git esta instalado
+# if ! [ -x "$(command -v git)" ]; then
+#     echo 'Error: git no está instalado.' >&2
+#     exit 1
+# fi
+# # checkear si existe F-ChatBOC-Front
+# if [ -d "F-ChatBOC-Front" ]; then
+#     echo 'Error: F-ChatBOC-Front ya existe.' >&2
+#     ./F-ChatBOC/chatapp/chatapp/init.sh
     
-fi
+# fi
 
-git clone -b despliegue https://github.com/AQM19/F-ChatBOC-Front.git
-cd F-ChatBOC-Front
-cd chatapp
+# git clone -b despliegue https://github.com/AQM19/F-ChatBOC-Front.git
+# cd F-ChatBOC-Front
+# cd chatapp
 
 # Función para detectar el sistema operativo
 detect_os() {
