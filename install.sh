@@ -51,6 +51,5 @@ fi
 pip install -r requirements.txt
 
 # Inicio de la api
-cd chatapp
-chmod +x init.sh
-./init.sh
+
+reflex run
