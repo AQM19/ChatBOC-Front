@@ -16,7 +16,7 @@ if [ -d "F-ChatBOC-Front" ]; then
     
 fi
 
-git clone -b despliegue https://github.com/AQM19/F-ChatBOC-Front.git -u
+git clone -b despliegue https://github.com/AQM19/F-ChatBOC-Front.git
 cd F-ChatBOC-Front
 cd chatapp
 
