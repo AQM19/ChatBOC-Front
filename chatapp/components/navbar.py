@@ -87,7 +87,7 @@ def navbar():
                     width="0px",
                     on_click=rx.redirect("/login")
                 ),
-                rx.heading("Reflex Chat"),
+                rx.heading("ChatBOC"),
                 rx.desktop_only(
                     rx.badge(
                     State.current_chat,
