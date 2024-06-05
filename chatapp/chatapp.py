@@ -146,6 +146,9 @@ app = rx.App(
         appearance="dark",
         accent_color="violet",
     ),
+    stylesheets=[
+        "/style.css",
+        ],
     
 )
 app.add_page(index)

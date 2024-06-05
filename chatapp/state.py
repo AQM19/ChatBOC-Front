@@ -7,7 +7,6 @@ import os
 from dotenv import load_dotenv
 
 
-
 class QA(rx.Base):
     """A question and answer pair."""
 
@@ -60,7 +59,7 @@ class State(rx.State):
             
             if response.status_code != 200:
                 return rx.event.window_alert("Server error, please try again.")
-            
+            logger.info(data)
             for chat in data:
                 self.chats_uuid[chat[1]] = chat[0]
                 self.chats[chat[1]] = self.getChat(chat[0],chat[1])
@@ -69,6 +68,9 @@ class State(rx.State):
                 self.current_chat = data[-1][1]
                 # Remove DEFAULT_CHATS
                 # del self.chats['Intros']
+            else:
+                self.new_chat_name="New chat"
+                self.create_chat()
         except httpx.HTTPStatusError:
             return rx.event.window_alert("Server error, please try again.")
             
@@ -113,7 +115,7 @@ class State(rx.State):
 
     def login(self,form_data):
         try:
-            
+            self.chats = DEFAULT_CHATS
             response = httpx.post(os.getenv('BACKEND_URL')+'/login', 
                                   json={'username': form_data['username'], 'password': form_data['password']},
                                   timeout=30,
@@ -247,8 +249,11 @@ class State(rx.State):
         if question == "":
             return
 
-        # Add the question to the list of questions.
-        qa = QA(question=question, answer='<img src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/images/loader-large.gif" alt="procesando respuesta">')
+        # Add the question to the list of questions. https://www.google.com/url?sa=i&url=https%3A%2F%2Fwpamelia.com%2Floading-animation%2F&psig=AOvVaw2ElavECpD5AHBCmioC6YcR&ust=1717682492076000&source=images&opi=89978449
+        #qa = QA(question=question, answer='<img src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/images/loader-large.gif" alt="procesando respuesta">')
+        #qa = QA(question=question, answer='<img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwpamelia.com%2Floading-animation%2F&psig=AOvVaw2ElavECpD5AHBCmioC6YcR&ust=1717682492076000&source=images&opi=89978449" alt="procesando respuesta">')
+        qa = QA(question=question, answer='<image src="/loader.gif" alt="procesando respuesta" width="30em" height="30em">')
+        #qa = QA(question=question, answer='<img src="https://res.cloudinary.com/bytesizedpieces/image/upload/v1656084931/article/a-how-to-guide-on-making-an-animated-loading-image-for-a-website/animated_loader_gif_n6b5x0.gif" alt="procesando respuesta" width="30" height="20">')
         self.chats[self.current_chat].append(qa)
         return rx.scroll_to("chat-end")
     
