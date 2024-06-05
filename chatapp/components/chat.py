@@ -44,19 +44,20 @@ def message(qa: QA) -> rx.Component:
 def chat() -> rx.Component:
     """List all the messages in a single conversation."""
     return rx.scroll_area(
-            rx.text(rx.foreach(State.chats[State.current_chat], message), width="100%", id="chat-box"),
-            rx.text("", id="chat-end"),
+            rx.box(rx.foreach(State.chats[State.current_chat], message), width="100%", id="chat-box"),
+            rx.box("", id="chat-end"),
             py="8",
+            id="scrollable-chat",
             flex="1",
             width="100%",
             max_width="50em",
             padding_x="4px",
             align_self="center",
             align_items="center",
-            overflow="hidden",
+            overflow="auto",
             padding_bottom="5em",
             on_mount=State.scroll_to_bottom,
-            
+            autofocus=False,
         )
     
 

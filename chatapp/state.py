@@ -248,9 +248,9 @@ class State(rx.State):
             return
 
         # Add the question to the list of questions.
-        qa = QA(question=question, answer='<img src="/home/rumantela/Proyectos/ceia/despliegue/F-ChatBOC-Front/assets/loading.gif" alt="procesando respuesta">')
+        qa = QA(question=question, answer='<img src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/images/loader-large.gif" alt="procesando respuesta">')
         self.chats[self.current_chat].append(qa)
-        return self.scroll_to_bottom()
+        return rx.scroll_to("chat-end")
     
     
     def process_question_llama(self, form_data: dict[str, str]):
@@ -264,6 +264,9 @@ class State(rx.State):
         self.processing = True
         self.llama_process_question(question)
         return self.scroll_to_bottom()      
+        # return rx.client_side(
+        #     f"document.getElementById('scrollable-chat').scrollTo(0, document.getElementById('scrollable-chat').scrollHeight);"
+        # )
     
     async def process_question(self, form_data: dict[str, str]):
         # Get the question from the form
