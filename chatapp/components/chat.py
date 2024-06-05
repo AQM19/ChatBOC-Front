@@ -43,8 +43,8 @@ def message(qa: QA) -> rx.Component:
 
 def chat() -> rx.Component:
     """List all the messages in a single conversation."""
-    return rx.vstack(
-            rx.box(rx.foreach(State.chats[State.current_chat], message), width="100%", id="chat-box",),
+    return rx.scroll_area(
+            rx.text(rx.foreach(State.chats[State.current_chat], message), width="100%", id="chat-box"),
             rx.text("", id="chat-end"),
             py="8",
             flex="1",
@@ -53,9 +53,10 @@ def chat() -> rx.Component:
             padding_x="4px",
             align_self="center",
             align_items="center",
-            overflow="scroll",
+            overflow="hidden",
             padding_bottom="5em",
             on_mount=State.scroll_to_bottom,
+            
         )
     
 
@@ -72,6 +73,7 @@ def action_bar() -> rx.Component:
                                 id="question",
                                 width=["15em", "20em", "45em", "50em", "50em", "50em"],
                                 name="question",
+                                on_change=State.set_question,
                             ),
                             rx.radix.text_field.slot(
                                 rx.tooltip(
@@ -79,7 +81,6 @@ def action_bar() -> rx.Component:
                                     content="Haz una pregunta",
                                 )
                             ),
-                            id_disable=State.processing,
                         ),
                         rx.button(
                             rx.cond(
@@ -87,6 +88,7 @@ def action_bar() -> rx.Component:
                                 loading_icon(height="1em"),
                                 rx.text("Send"),
                             ),
+                            on_click=State.submit_question,
                             type="submit",
                         ),
                         rx.button(
@@ -99,6 +101,7 @@ def action_bar() -> rx.Component:
                     ),
                     is_disabled=State.processing,
                 ),
+                #on_submit=State.submit_question,
                 on_submit=State.process_question,
                 reset_on_submit=True,
             ),

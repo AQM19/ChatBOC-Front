@@ -96,7 +96,7 @@ class State(rx.State):
                 # line[3] -> message
                 # line[4] -> is_response
                 # line[5] -> created_at
-                logger.info(f"Line: {line}")
+                #logger.info(f"Line: {line}")
                 if line[4]:
                     answer = line[3]
                 else:
@@ -194,9 +194,9 @@ class State(rx.State):
         except httpx.HTTPStatusError:
             return rx.event.window_alert("Server error, please try again.")
         del self.chats[self.current_chat]
-        logger.info(f"Chats: {self.chats}")
-        logger.info(f"Chats UUID: {self.chats_uuid}")
-        logger.info(len(self.chats))
+        # logger.info(f"Chats: {self.chats}")
+        # logger.info(f"Chats UUID: {self.chats_uuid}")
+        # logger.info(len(self.chats))
         if len(self.chats) == 0:
             logger.info("No chats left.")
             self.chats = DEFAULT_CHATS
@@ -224,7 +224,47 @@ class State(rx.State):
             The list of chat names.
         """
         return list(self.chats.keys())
+    def set_question(self, question: str):
+        """Set the current question.
 
+        Args:
+            question: The current question.
+        """
+        #logger.info(f"Question(set_question): {question}")
+        self.question = question
+
+    def submit_question(self):
+        """Submit a question to the chat.
+
+        Args:
+            form_data: A dict with the current question.
+        """
+        # Get the question from the form
+        question = self.question
+        #logger.info(f"Question(submit_question): {question}")
+
+        # Check if the question is empty
+        if question == "":
+            return
+
+        # Add the question to the list of questions.
+        qa = QA(question=question, answer='<img src="/home/rumantela/Proyectos/ceia/despliegue/F-ChatBOC-Front/assets/loading.gif" alt="procesando respuesta">')
+        self.chats[self.current_chat].append(qa)
+        return self.scroll_to_bottom()
+    
+    
+    def process_question_llama(self, form_data: dict[str, str]):
+        # Get the question from the form
+        question = form_data["question"]
+
+        # Check if the question is empty
+        if question == "":
+            return
+        
+        self.processing = True
+        self.llama_process_question(question)
+        return self.scroll_to_bottom()      
+    
     async def process_question(self, form_data: dict[str, str]):
         # Get the question from the form
         question = form_data["question"]
@@ -232,10 +272,6 @@ class State(rx.State):
         # Check if the question is empty
         if question == "":
             return
-        # Add the question to the list of questions.
-        # qa = QA(question=question, answer="...procesando")
-        # self.chats[self.current_chat].append(qa)
-        # self.processing = True
         
         model = self.openai_process_question
         
@@ -248,41 +284,11 @@ class State(rx.State):
         Args:
             form_data: A dict with the current question.
         """
-        
-        qa = QA(question=question, answer="")
-        self.chats[self.current_chat].append(qa)
 
         # Clear the input and start the processing.
         self.processing = True
         yield
 
-        # Build the messages.
-        # messages = [
-        #     {
-        #         "role": "system",
-        #         "content": "You are a friendly chatbot named chatBOC. Respond in markdown.",
-        #     }
-        # ]
-        # for qa in self.chats[self.current_chat]:
-        #     messages.append({"role": "user", "content": qa.question})
-        #     messages.append({"role": "assistant", "content": qa.answer})
-
-        # # Remove the last mock answer.
-        # messages = messages[:-1]
-
-        # The following commented-out section is for OpenAI API call simulation.
-        # Uncomment and use it if you have OpenAI setup.
-        #
-        # session = OpenAI().chat.completions.create(
-        #     model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
-        #     messages=messages,
-        #     stream=True,
-        # )
-        #
-        # Stream the results, yielding after every word.
-        # for item in session:
-        #     if hasattr(item.choices[0].delta, "content"):
-        #response = requests.get("http://localhost:5000/")
         cookies = {'session': self.session}
         headers = {'Authorization': f'Bearer {self.token}'}
         response = httpx.get(os.getenv('BACKEND_URL')+f'/?question={question}&chat_id={self.chats_uuid[self.current_chat]}',
@@ -293,10 +299,11 @@ class State(rx.State):
         if not response or response.status_code != 200:
             self.chats[self.current_chat][-1].answer += "Sorry, I couldn't get a response from the server."
         else:
-            logger.info(f"Response: {response}")
+            #logger.info(f"Response: {response}")
             answer_text = response.json()['message']
             if answer_text is not None:
-                self.chats[self.current_chat][-1].answer += answer_text
+
+                self.chats[self.current_chat][-1].answer = answer_text
             else:
                 answer_text = ""
                 self.chats[self.current_chat][-1].answer += answer_text
@@ -316,9 +323,6 @@ class State(rx.State):
         Args:
             form_data: A dict with the current question.
         """
-
-        
-
         # Clear the input and start the processing.
         self.processing = True
         
@@ -360,17 +364,15 @@ class State(rx.State):
         if not response or response.status_code != 200:
             self.chats[self.current_chat][-1].answer += "Sorry, I couldn't get a response from the server."
         else:
-            logger.info(f"Response: {response}")
-            answer_text = response.json()
+            #logger.info(f"Response: {response.json()}")
+            answer_text = response.json()['message']
             if answer_text is not None:
-                self.chats[self.current_chat][-1].answer += answer_text
+                self.chats[self.current_chat][-1].answer = answer_text
             else:
                 answer_text = ""
                 self.chats[self.current_chat][-1].answer += answer_text
             self.chats = self.chats
             
-        
-        self.scroll_to_bottom()
 
         # Toggle the processing flag.
         self.processing = False
